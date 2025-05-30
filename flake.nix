@@ -97,8 +97,8 @@
               pkgs.uv
               pkgs.poetry
               pkgs.awscli2
+              pkgs.s5cmd
               pkgs.moreutils
-              # pkgs.wrangler
               pkgs.neovim
               pkgs.delta
               pkgs.zoxide
