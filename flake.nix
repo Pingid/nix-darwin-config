@@ -35,10 +35,10 @@
         name = username;
         home = homeDirectory;
       };
-      
+
       # Set primary user for system defaults
       system.primaryUser = username;
-      
+
       # # Enable homebrew
       # homebrew.enable = true;
       # homebrew.casks = [{ name = "google-chrome"; }];
@@ -81,7 +81,7 @@
         {
           home-manager.useGlobalPkgs = true;
           # home-manager.useUserPackages = true;
-          home-manager.users.${username} = { pkgs, ... }: { 
+          home-manager.users.${username} = { pkgs, ... }: {
             home.stateVersion = "24.11";
 
             home.packages = [
@@ -107,6 +107,7 @@
               pkgs.ripgrep
               pkgs.broot
               pkgs.ollama
+              pkgs.nixd
             ];
 
             home.file.".config/fish/conf.d/fnm.fish".text = ''
@@ -137,9 +138,34 @@
                       action = wezterm.action.ClearScrollback "ScrollbackAndViewport",
                   },
               }
-              
+
               return config
             '';
+            home.file.".config/zed/settings.json".text = ''
+              {
+                "agent": {
+                        "model_parameters": [],
+                        "default_profile": "ask",
+                        "version": "2"
+                    },
+                    "terminal": {
+                        "shell": {
+                        "program": "fish"
+                        }
+                    },
+                    "base_keymap": "VSCode",
+                    "ui_font_size": 16,
+                    "buffer_font_size": 16,
+                    "theme": {
+                        "mode": "system",
+                        "light": "GitHub Dark Default",
+                        "dark": "One Dark"
+                    }
+                }
+            '';
+
+
+
 
             programs.git = {
               enable = true;
@@ -161,7 +187,7 @@
                 color.ui = "auto";
                 pull.rebase = "true";
                 core.fileMode = "false";
-                
+
                 # Use delta as the default pager
                 core.pager = "delta";
                 interactive.diffFilter = "delta --color-only";
