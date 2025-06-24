@@ -26,15 +26,27 @@
 
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
-      environment.systemPackages = [
-        pkgs.git
+      environment.systemPackages = with pkgs; [
+        git
+        pkg-config
+        openssl
+        openssl.dev
       ];
+      
+      # Set environment variables for openssl
+      environment.variables.PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+      environment.variables.OPENSSL_DIR = "${pkgs.openssl.dev}";
+      environment.variables.OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
+      environment.variables.OPENSSL_LIB_DIR = "${pkgs.lib.getLib pkgs.openssl}/lib";
+      environment.variables.OPENSSL_NO_VENDOR = "1";
 
       # Define user in nix-darwin
       users.users.${username} = {
         name = username;
         home = homeDirectory;
       };
+
+      
 
       # Set primary user for system defaults
       system.primaryUser = username;
@@ -110,6 +122,21 @@
               pkgs.nixd
             ];
 
+            home.file.".config/fish/conf.d/pkg-config.fish".text = ''
+              set -x PKG_CONFIG_PATH ${pkgs.openssl.dev}/lib/pkgconfig
+            '';
+            # OPENSSL_DIR       = "${pkgs.openssl.dev}";
+            # OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
+            # # "getLib" gives you the runtime output's /lib folder:
+            # OPENSSL_LIB_DIR   = "${pkgs.lib.getLib pkgs.openssl}/lib";
+            # OPENSSL_NO_VENDOR = "1";
+            home.file.".config/fish/conf.d/openssl.fish".text = ''
+              set -x OPENSSL_DIR ${pkgs.openssl.dev};
+              set -x OPENSSL_INCLUDE_DIR ${pkgs.openssl.dev}/include;
+              set -x OPENSSL_LIB_DIR ${pkgs.lib.getLib pkgs.openssl}/lib;
+              set -x OPENSSL_NO_VENDOR 1;
+            '';
+
             home.file.".config/fish/conf.d/fnm.fish".text = ''
               fnm env --use-on-cd --shell fish | source
             '';
@@ -154,8 +181,8 @@
                         }
                     },
                     "base_keymap": "VSCode",
-                    "ui_font_size": 16,
-                    "buffer_font_size": 16,
+                    "ui_font_size": 12,
+                    "buffer_font_size": 12,
                     "theme": {
                         "mode": "system",
                         "light": "GitHub Dark Default",
@@ -163,10 +190,6 @@
                     }
                 }
             '';
-
-
-
-
             programs.git = {
               enable = true;
               userEmail = "${email}";
@@ -187,6 +210,7 @@
                 color.ui = "auto";
                 pull.rebase = "true";
                 core.fileMode = "false";
+                push.forceWithLease = "true";
 
                 # Use delta as the default pager
                 core.pager = "delta";
