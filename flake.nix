@@ -7,9 +7,19 @@
     nix-darwin.url = "github:LnL7/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
+    # Homebrew installer & taps
+    nix-homebrew.url   = "github:zhaofengli/nix-homebrew";
+    homebrew-core = {
+      url   = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url   = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, home-manager, nix-homebrew, homebrew-core, homebrew-cask }:
 
   let
     config = import ./config.nix;
@@ -46,14 +56,12 @@
         home = homeDirectory;
       };
 
-      
+      # # install brew-managed formulae
+      # homebrew.enable = true;
+      # homebrew.brews  = [ "pnpm" ];
 
       # Set primary user for system defaults
       system.primaryUser = username;
-
-      # # Enable homebrew
-      # homebrew.enable = true;
-      # homebrew.casks = [{ name = "google-chrome"; }];
 
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
@@ -88,7 +96,20 @@
   {
     darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
       modules = [
+        nix-homebrew.darwinModules.nix-homebrew
         configuration
+        {
+          nix-homebrew = {
+            enable       = true;
+            enableRosetta= true;
+            user         = username;
+            taps = {
+              "homebrew/homebrew-core" = homebrew-core;
+              "homebrew/homebrew-cask" = homebrew-cask;
+            };
+            mutableTaps = false;
+          };
+        }
         home-manager.darwinModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
@@ -121,6 +142,20 @@
               pkgs.ollama
               pkgs.nixd
             ];
+
+            home.file.".config/fish/conf.d/homebrew.fish".text =
+              let
+                # Homebrew’s bin directory for the current platform
+                brewBin =
+                  if systemType == "aarch64-darwin"
+                  then "/opt/homebrew/bin"
+                  else "/usr/local/bin";
+              in
+                ''
+                  # add Homebrew to PATH only once
+                  contains ${brewBin} $PATH
+                    or set -gx PATH ${brewBin} $PATH
+                '';
 
             home.file.".config/fish/conf.d/pkg-config.fish".text = ''
               set -x PKG_CONFIG_PATH ${pkgs.openssl.dev}/lib/pkgconfig
@@ -181,7 +216,7 @@
                         }
                     },
                     "base_keymap": "VSCode",
-                    "ui_font_size": 12,
+                    "ui_font_size": 14,
                     "buffer_font_size": 12,
                     "theme": {
                         "mode": "system",
