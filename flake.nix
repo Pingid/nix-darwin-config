@@ -54,6 +54,7 @@
       users.users.${username} = {
         name = username;
         home = homeDirectory;
+        shell = pkgs.fish;
       };
 
       # # install brew-managed formulae
@@ -68,6 +69,7 @@
 
       # Enable alternative shell support in nix-darwin.
       programs.fish.enable = true;
+      environment.shells = [ pkgs.fish ];
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -160,11 +162,7 @@
             home.file.".config/fish/conf.d/pkg-config.fish".text = ''
               set -x PKG_CONFIG_PATH ${pkgs.openssl.dev}/lib/pkgconfig
             '';
-            # OPENSSL_DIR       = "${pkgs.openssl.dev}";
-            # OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include";
-            # # "getLib" gives you the runtime output's /lib folder:
-            # OPENSSL_LIB_DIR   = "${pkgs.lib.getLib pkgs.openssl}/lib";
-            # OPENSSL_NO_VENDOR = "1";
+
             home.file.".config/fish/conf.d/openssl.fish".text = ''
               set -x OPENSSL_DIR ${pkgs.openssl.dev};
               set -x OPENSSL_INCLUDE_DIR ${pkgs.openssl.dev}/include;
@@ -181,6 +179,16 @@
             home.file.".config/fish/conf.d/zoxide.fish".text = ''
               zoxide init fish | source
             '';
+            home.file.".config/fish/conf.d/claude.fish".text = ''
+              function kimi
+                  set -x ANTHROPIC_BASE_URL https://api.moonshot.ai/anthropic
+                  set -x ANTHROPIC_AUTH_TOKEN $KIMI_API_KEY
+                  set -x ANTHROPIC_MODEL kimi-k2-thinking
+                  set -x ANTHROPIC_SMALL_FAST_MODEL kimi-latest
+                  claude $argv
+              end
+            '';
+
             home.file.".wezterm.lua".text = ''
               local wezterm = require 'wezterm'
               local config = {}
@@ -225,6 +233,32 @@
                     }
                 }
             '';
+
+            # Fish shell configuration with Fisher package manager
+            programs.fish = {
+              enable = true;
+              interactiveShellInit = ''
+                # Install Fisher if not already installed
+                if not functions -q fisher
+                  echo "Installing Fisher..."
+                  curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+                  fisher install jorgebucaran/fisher
+                end
+
+                # Install Pure prompt if not already installed
+                if not test -e ~/.config/fish/conf.d/pure.fish
+                  echo "Installing Pure prompt..."
+                  fisher install pure-fish/pure
+                end
+
+                # Install Pure prompt if not already installed
+                if not test -e ~/.config/fish/conf.d/gitnow.fish
+                  echo "Installing GitNow plugin..."
+                  fisher install joseluisq/gitnow
+                end
+              '';
+            };
+
             programs.git = {
               enable = true;
               userEmail = "${email}";
@@ -246,6 +280,9 @@
                 pull.rebase = "true";
                 core.fileMode = "false";
                 push.forceWithLease = "true";
+                credential.helper = "osxkeychain";
+                # To check if using git with cli for fetch
+                net.git-fetch-with-cli = "true";
 
                 # Use delta as the default pager
                 core.pager = "delta";
