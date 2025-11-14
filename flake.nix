@@ -250,12 +250,6 @@
                   echo "Installing Pure prompt..."
                   fisher install pure-fish/pure
                 end
-
-                # Install Pure prompt if not already installed
-                if not test -e ~/.config/fish/conf.d/gitnow.fish
-                  echo "Installing GitNow plugin..."
-                  fisher install joseluisq/gitnow
-                end
               '';
             };
 
