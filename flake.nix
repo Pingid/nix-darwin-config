@@ -57,10 +57,6 @@
         shell = pkgs.fish;
       };
 
-      # # install brew-managed formulae
-      # homebrew.enable = true;
-      # homebrew.brews  = [ "pnpm" ];
-
       # Set primary user for system defaults
       system.primaryUser = username;
 
@@ -255,34 +251,52 @@
 
             programs.git = {
               enable = true;
-              userEmail = "${email}";
-              userName = "${name}";
-              aliases = {
-                # For push
-                pf = "push --force-with-lease";
-                # Add all changes to last commit and force push
-                pa = "!git add . && git commit --amend --no-edit && git push --force-with-lease";
-                # Pull with rebase and stash untracked files
-                get = "!git stash push --include-untracked && git pull --rebase && git stash pop";
-              };
-              extraConfig = {
-                init.defaultBranch = "main";
-                push.autoSetupRemote = "true";
-                push.default = "current";
-                core.editor = "nvim";
-                color.ui = "auto";
-                pull.rebase = "true";
-                core.fileMode = "false";
-                push.forceWithLease = "true";
-                credential.helper = "osxkeychain";
-                # To check if using git with cli for fetch
-                net.git-fetch-with-cli = "true";
 
-                # Use delta as the default pager
-                core.pager = "delta";
-                interactive.diffFilter = "delta --color-only";
-                delta.navigate = "true";
+              ignores = [
+                ".DS_Store"
+                "*.log"
+                ".claude"
+                "CLAUDE.md"
+                "AGENTS.md"
+                "lib.md"
+              ];
+
+              settings = {
+                user = {
+                  name = "${name}";
+                  email = "${email}";
+                };
+
+                alias = {
+                  pf = "push --force-with-lease";
+                  pa = "!git add . && git commit --amend --no-edit && git push --force-with-lease";
+                  get = "!git stash push --include-untracked && git pull --rebase && git stash pop";
+                };
+
+                core = {
+                  editor = "nvim";
+                  fileMode = false;
+                  pager = "delta";
+                };
+
+                init.defaultBranch = "main";
+
+                push = {
+                  autoSetupRemote = true;
+                  default = "current";
+                  forceWithLease = true;
+                };
+
+                credential.helper = "osxkeychain";
+
+                pull.rebase = true;
+
                 merge.conflictStyle = "zdiff3";
+
+                net."git-fetch-with-cli" = true;
+
+                interactive.diffFilter = "delta --color-only";
+                delta.navigate = true;
               };
             };
           };
