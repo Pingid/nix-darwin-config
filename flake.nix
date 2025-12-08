@@ -174,6 +174,27 @@
             '';
             home.file.".config/fish/conf.d/zoxide.fish".text = ''
               zoxide init fish | source
+
+              # Alias to use zoxide to find a directory and pass it to a command
+              function ze
+                  if test (count $argv) -lt 2
+                      echo "Usage: ze <command> <directory>"
+                      echo "Example: ze open folder-a"
+                      return 1
+                  end
+
+                  set cmd $argv[1]
+                  set query $argv[2..-1]
+                  set dir (zoxide query -- $query 2>/dev/null)
+
+                  if test -z "$dir"
+                      echo "Directory not found in zoxide database: $query"
+                      return 1
+                  end
+
+                  echo "Opening $dir with $cmd"
+                  command $cmd $dir
+              end
             '';
             home.file.".config/fish/conf.d/claude.fish".text = ''
               function kimi
