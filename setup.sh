@@ -57,3 +57,4 @@ cat >config.nix <<EOF
 EOF
 
 echo "Config written to ./config.nix"
+git update-index --skip-worktree config.nix

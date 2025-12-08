@@ -1,8 +1,8 @@
 {
   systemType     = "aarch64-darwin";     # e.g. aarch64-darwin
-  hostname       = "Daniels-MacBook-Pro";
-  username       = "dan";
-  homeDirectory  = "/Users/dan";
-  email          = "dm.beaven@gmail.com";
-  name           = "Dan Beaven";
+  hostname       = "Johns-MacBook-Pro";
+  username       = "John";
+  homeDirectory  = "/Users/john";
+  email          = "john.doe@example.com";
+  name           = "John Doe";
 }
