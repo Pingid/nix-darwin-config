@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # -- Prompt for system type ─────────────────────────────────────────────────────
-arch="$(uname -m)"                            # e.g. arm64 or x86_64 :contentReference[oaicite:0]{index=0}
-os="$(uname -s | tr '[:upper:]' '[:lower:]')" # darwin, linux, etc :contentReference[oaicite:1]{index=1}
-default_system_type="${arch}-${os}"
+arch="$(uname -m)"                            # e.g. arm64 or x86_64
+case "$arch" in
+  arm64)   nix_arch="aarch64" ;;             # map macOS arm64 -> Nix's aarch64
+  x86_64)  nix_arch="x86_64" ;;
+  *)       nix_arch="$arch" ;;
+esac
+
+os="$(uname -s | tr '[:upper:]' '[:lower:]')" # darwin, linux, etc
+default_system_type="${nix_arch}-${os}"
 read -p "System Type [${default_system_type}]: " system_type
 system_type="${system_type:-$default_system_type}"
 

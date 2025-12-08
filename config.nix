@@ -1,5 +1,5 @@
 {
-  systemType     = "arm64-darwin";     # e.g. aarch64-darwin
+  systemType     = "aarch64-darwin";     # e.g. aarch64-darwin
   hostname       = "Daniels-MacBook-Pro";
   username       = "dan";
   homeDirectory  = "/Users/dan";

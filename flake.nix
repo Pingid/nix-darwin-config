@@ -206,120 +206,21 @@
               end
             '';
 
-            home.file.".wezterm.lua".text = ''
-              local wezterm = require 'wezterm'
-              local config = {}
+            home.file.".wezterm.lua".source = ./configs/wezterm.lua;
+            home.file.".config/zed/settings.json".source = ./configs/zed.json;
 
-              config.default_prog = { "/run/current-system/sw/bin/fish" }  -- Replace with your shell path
-              config.window_close_confirmation = "NeverPrompt"
-              config.window_background_opacity = .8
-              config.macos_window_background_blur = 100
-              config.native_macos_fullscreen_mode = true
-              config.use_fancy_tab_bar = false
-              config.show_tabs_in_tab_bar = true
-              config.show_new_tab_button_in_tab_bar = false
-              config.keys = {
-                  {
-                      key = "k",
-                      mods = "CMD",
-                      action = wezterm.action.ClearScrollback "ScrollbackAndViewport",
-                  },
-              }
-
-              return config
-            '';
-            home.file.".config/zed/settings.json".text = ''
-              {
-                "agent": {
-                        "model_parameters": [],
-                        "default_profile": "ask",
-                        "version": "2"
-                    },
-                    "terminal": {
-                        "shell": {
-                        "program": "fish"
-                        }
-                    },
-                    "base_keymap": "VSCode",
-                    "ui_font_size": 14,
-                    "buffer_font_size": 12,
-                    "theme": {
-                        "mode": "system",
-                        "light": "GitHub Dark Default",
-                        "dark": "One Dark"
-                    }
-                }
-            '';
-
-            # Fish shell configuration with Fisher package manager
+            # Fish shell configuration with declarative plugin management
             programs.fish = {
               enable = true;
-              interactiveShellInit = ''
-                # Install Fisher if not already installed
-                if not functions -q fisher
-                  echo "Installing Fisher..."
-                  curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
-                  fisher install jorgebucaran/fisher
-                end
-
-                # Install Pure prompt if not already installed
-                if not test -e ~/.config/fish/conf.d/pure.fish
-                  echo "Installing Pure prompt..."
-                  fisher install pure-fish/pure
-                end
-              '';
-            };
-
-            programs.git = {
-              enable = true;
-
-              ignores = [
-                ".DS_Store"
-                "*.log"
-                ".claude"
-                "CLAUDE.md"
-                "AGENTS.md"
-                "lib.md"
+              plugins = [
+                {
+                  name = "pure";
+                  src = pkgs.fishPlugins.pure.src;
+                }
               ];
-
-              settings = {
-                user = {
-                  name = "${name}";
-                  email = "${email}";
-                };
-
-                alias = {
-                  pf = "push --force-with-lease";
-                  pa = "!git add . && git commit --amend --no-edit && git push --force-with-lease";
-                  get = "!git stash push --include-untracked && git pull --rebase && git stash pop";
-                };
-
-                core = {
-                  editor = "nvim";
-                  fileMode = false;
-                  pager = "delta";
-                };
-
-                init.defaultBranch = "main";
-
-                push = {
-                  autoSetupRemote = true;
-                  default = "current";
-                  forceWithLease = true;
-                };
-
-                credential.helper = "osxkeychain";
-
-                pull.rebase = true;
-
-                merge.conflictStyle = "zdiff3";
-
-                net."git-fetch-with-cli" = true;
-
-                interactive.diffFilter = "delta --color-only";
-                delta.navigate = true;
-              };
             };
+
+            programs.git = import ./configs/git.nix { inherit name email; };
           };
         }
       ];

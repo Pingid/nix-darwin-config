@@ -1,0 +1,20 @@
+{
+  "agent": {
+    "model_parameters": [],
+    "default_profile": "ask",
+    "version": "2"
+  },
+  "terminal": {
+    "shell": {
+      "program": "fish"
+    }
+  },
+  "base_keymap": "VSCode",
+  "ui_font_size": 14,
+  "buffer_font_size": 12,
+  "theme": {
+    "mode": "system",
+    "light": "GitHub Dark Default",
+    "dark": "One Dark"
+  }
+}
