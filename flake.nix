@@ -65,7 +65,8 @@
 
       # Enable alternative shell support in nix-darwin.
       programs.fish.enable = true;
-      environment.shells = [ pkgs.fish ];
+      programs.zsh.enable = true;
+      environment.shells = [ pkgs.fish pkgs.zsh ];
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -218,6 +219,15 @@
                   src = pkgs.fishPlugins.pure.src;
                 }
               ];
+            };
+
+            # Zsh shell configuration
+            programs.zsh = {
+              enable = true;
+              initExtra = ''
+                # fnm (Node version manager)
+                eval "$(fnm env --use-on-cd --shell zsh)"
+              '';
             };
 
             programs.git = import ./configs/git.nix { inherit name email; };
